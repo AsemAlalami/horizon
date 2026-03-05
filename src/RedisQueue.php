@@ -6,6 +6,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\RedisQueue as BaseQueue;
 use Illuminate\Support\Str;
 use Laravel\Horizon\Events\JobDeleted;
+use Laravel\Horizon\Events\JobPending;
 use Laravel\Horizon\Events\JobPushed;
 use Laravel\Horizon\Events\JobReleased;
 use Laravel\Horizon\Events\JobReserved;
@@ -39,6 +40,7 @@ class RedisQueue extends BaseQueue
      * @param  string|null  $queue
      * @return mixed
      */
+    #[\Override]
     public function push($job, $data = '', $queue = null)
     {
         return $this->enqueueUsing(
@@ -58,13 +60,16 @@ class RedisQueue extends BaseQueue
      * Push a raw payload onto the queue.
      *
      * @param  string  $payload
-     * @param  string  $queue
+     * @param  string|null  $queue
      * @param  array  $options
      * @return mixed
      */
+    #[\Override]
     public function pushRaw($payload, $queue = null, array $options = [])
     {
         $payload = (new JobPayload($payload))->prepare($this->lastPushed);
+
+        $this->event($this->getQueue($queue), new JobPending($payload->value));
 
         parent::pushRaw($payload->value, $queue, $options);
 
@@ -81,6 +86,7 @@ class RedisQueue extends BaseQueue
      * @param  mixed  $data
      * @return array
      */
+    #[\Override]
     protected function createPayloadArray($job, $queue, $data = '')
     {
         $payload = parent::createPayloadArray($job, $queue, $data);
@@ -96,9 +102,10 @@ class RedisQueue extends BaseQueue
      * @param  \DateTimeInterface|\DateInterval|int  $delay
      * @param  string  $job
      * @param  mixed  $data
-     * @param  string  $queue
+     * @param  string|null  $queue
      * @return mixed
      */
+    #[\Override]
     public function later($delay, $job, $data = '', $queue = null)
     {
         $payload = (new JobPayload($this->createPayload($job, $queue, $data)))->prepare($job)->value;
@@ -110,12 +117,16 @@ class RedisQueue extends BaseQueue
                 $queue,
                 $delay,
                 function ($payload, $queue, $delay) {
+                    $this->event($this->getQueue($queue), new JobPending($payload));
+
                     return tap(parent::laterRaw($delay, $payload, $queue), function () use ($payload, $queue) {
                         $this->event($this->getQueue($queue), new JobPushed($payload));
                     });
                 }
             );
         }
+
+        $this->event($this->getQueue($queue), new JobPending($payload));
 
         return tap(parent::laterRaw($delay, $payload, $queue), function () use ($payload, $queue) {
             $this->event($this->getQueue($queue), new JobPushed($payload));
@@ -125,9 +136,11 @@ class RedisQueue extends BaseQueue
     /**
      * Pop the next job off of the queue.
      *
-     * @param  string  $queue
+     * @param  string|null  $queue
+     * @param  int  $index
      * @return \Illuminate\Contracts\Queue\Job|null
      */
+    #[\Override]
     public function pop($queue = null, $index = 0)
     {
         return tap(parent::pop($queue, $index), function ($result) use ($queue) {
@@ -144,10 +157,11 @@ class RedisQueue extends BaseQueue
      * @param  string  $to
      * @return void
      */
+    #[\Override]
     public function migrateExpiredJobs($from, $to)
     {
         return tap(parent::migrateExpiredJobs($from, $to), function ($jobs) use ($to) {
-            $this->event($to, new JobsMigrated($jobs));
+            $this->event($to, new JobsMigrated($jobs === false ? [] : $jobs));
         });
     }
 
@@ -158,6 +172,7 @@ class RedisQueue extends BaseQueue
      * @param  \Illuminate\Queue\Jobs\RedisJob  $job
      * @return void
      */
+    #[\Override]
     public function deleteReserved($queue, $job)
     {
         parent::deleteReserved($queue, $job);
@@ -173,6 +188,7 @@ class RedisQueue extends BaseQueue
      * @param  int  $delay
      * @return void
      */
+    #[\Override]
     public function deleteAndRelease($queue, $job, $delay)
     {
         parent::deleteAndRelease($queue, $job, $delay);
