@@ -1,6 +1,34 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/horizon/compare/v5.45.0...5.x)
+## [Unreleased](https://github.com/laravel/horizon/compare/v5.45.5...5.x)
+
+## [v5.45.5](https://github.com/laravel/horizon/compare/v5.45.4...v5.45.5) - 2026-04-01
+
+* Bump picomatch from 2.3.1 to 2.3.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/laravel/horizon/pull/1748
+* Add `.npmrc` file by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/horizon/pull/1753
+
+## [v5.45.4](https://github.com/laravel/horizon/compare/v5.45.3...v5.45.4) - 2026-03-18
+
+* Remove redundant "When to Apply" section from skill body by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/horizon/pull/1729
+
+## [v5.45.3](https://github.com/laravel/horizon/compare/v5.45.2...v5.45.3) - 2026-03-11
+
+* Refine Horizon skill description by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/horizon/pull/1727
+* Update configure-horizon skill examples and command references by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/horizon/pull/1725
+
+## [v5.45.2](https://github.com/laravel/horizon/compare/v5.45.1...v5.45.2) - 2026-03-10
+
+**Full Changelog**: https://github.com/laravel/horizon/compare/v5.45.1...v5.45.2
+
+## [v5.45.1](https://github.com/laravel/horizon/compare/v5.45.0...v5.45.1) - 2026-03-06
+
+* [5.x] Fix runaway memory usage with `horizon:listen` by [@cosmastech](https://github.com/cosmastech) in https://github.com/laravel/horizon/pull/1716
+* Bump rollup from 4.22.4 to 4.59.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/laravel/horizon/pull/1717
+* Reduce risks of `localStorage` collision by [@meduzen](https://github.com/meduzen) in https://github.com/laravel/horizon/pull/1719
+* return exit code from terminate command by [@webard](https://github.com/webard) in https://github.com/laravel/horizon/pull/1718
+* Bump immutable from 4.3.5 to 4.3.8 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/laravel/horizon/pull/1722
+* Show delayed badge for jobs pending retry backoff by [@SanderMuller](https://github.com/SanderMuller) in https://github.com/laravel/horizon/pull/1721
+* Add configure-horizon Boost skill by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/horizon/pull/1723
 
 ## [v5.45.0](https://github.com/laravel/horizon/compare/v5.44.0...v5.45.0) - 2026-02-21
 
