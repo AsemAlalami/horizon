@@ -3,6 +3,7 @@
 namespace Laravel\Horizon;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Foundation\Application;
 use Illuminate\Queue\RedisQueue as BaseQueue;
 use Illuminate\Support\Str;
 use Laravel\Horizon\Events\JobDeleted;
@@ -29,7 +30,11 @@ class RedisQueue extends BaseQueue
      */
     public function readyNow($queue = null)
     {
-        return $this->getConnection()->llen($this->getQueue($queue));
+        $key = method_exists(parent::class, 'getQueueRedisKey')
+            ? $this->getQueueRedisKey($queue)
+            : $this->getQueue($queue);
+
+        return $this->getConnection()->llen($key);
     }
 
     /**
@@ -108,7 +113,11 @@ class RedisQueue extends BaseQueue
     #[\Override]
     public function later($delay, $job, $data = '', $queue = null)
     {
-        $payload = (new JobPayload($this->createPayload($job, $queue, $data)))->prepare($job)->value;
+        $args = version_compare(Application::class, '12.11.0', '>=')
+            ? [$job, $queue, $data, $delay]
+            : [$job, $queue, $data];
+
+        $payload = (new JobPayload($this->createPayload(...$args)))->prepare($job)->value;
 
         if (method_exists($this, 'enqueueUsing')) {
             return $this->enqueueUsing(
